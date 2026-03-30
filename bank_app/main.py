@@ -47,6 +47,7 @@ def register():
 # ----------- 
 # Login Route
 # -----------
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     # Redirect logged-in users to dashboard
@@ -56,10 +57,12 @@ def login():
     if request.method == "POST":
         user = User.query.filter_by(username=request.form["username"]).first()
 
+        # Invalid username or password
         if not user or not check_password_hash(user.password, request.form["password"]):
             flash("Invalid credentials", "error")
             return redirect("/login")
 
+        # Block login if not approved (non-admin users)
         if not user.approved and not user.is_admin:
             flash("Waiting for admin approval", "info")
             return redirect("/login")
@@ -71,7 +74,6 @@ def login():
         return redirect("/dashboard")
 
     return render_template("login.html")
-
 
 # ------------
 # Logout Route
@@ -117,16 +119,22 @@ def approve(user_id):
 # -------------
 # Deposit Route
 # -------------
+
 @app.route("/deposit", methods=["POST"])
 def deposit():
     if "user_id" not in session:
+        flash("Please log in first.", "error")
         return redirect("/login")
 
     user = User.query.get(session["user_id"])
+    if not user:
+        session.clear()
+        flash("User not found. Please log in again.", "error")
+        return redirect("/login")
 
     try:
         amount = float(request.form["amount"])
-    except ValueError:
+    except (ValueError, TypeError):
         flash("Invalid amount", "error")
         return redirect("/dashboard")
 
@@ -136,24 +144,29 @@ def deposit():
 
     user.balance += amount
     db.session.commit()
-
     flash(f"${amount:.2f} deposited successfully!", "success")
     return redirect("/dashboard")
 
 # --------------
 # Transfer Route
 # --------------
+
 @app.route("/transfer", methods=["POST"])
 def transfer():
     if "user_id" not in session:
+        flash("Please log in first.", "error")
         return redirect("/login")
 
     sender = User.query.get(session["user_id"])
-    recipient_account = request.form.get("account_number")
+    if not sender:
+        session.clear()
+        flash("User not found. Please log in again.", "error")
+        return redirect("/login")
 
+    recipient_account = request.form.get("account_number")
     try:
         amount = float(request.form.get("amount"))
-    except ValueError:
+    except (ValueError, TypeError):
         flash("Invalid amount", "error")
         return redirect("/dashboard")
 

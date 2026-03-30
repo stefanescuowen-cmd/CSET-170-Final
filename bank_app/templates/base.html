@@ -10,14 +10,34 @@
         <h1>Banking System</h1>
 
         <nav>
-            <a href="/register">Register</a> |
-            <a href="/login">Login</a> |
-            <a href="/dashboard">Dashboard</a> |
-            <a href="/transfer">Transfer</a> |
-            <a href="/admin">Admin</a>
+            {% if session.get('user_id') %}
+                <a href="/dashboard">Dashboard</a>
+                <a href="/transfer">Transfer</a>
+
+                {% if session.get('is_admin') %}
+                    | <a href="/admin">Admin</a>
+                {% endif %}
+
+                | <a href="/logout">Logout</a>
+            {% else %}
+                <a href="/register">Register</a> |
+                <a href="/login">Login</a>
+            {% endif %}
         </nav>
 
         <hr>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="flashes">
+              {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
     </header>
 
     <main>
