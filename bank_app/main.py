@@ -35,6 +35,15 @@ def register():
 
     return render_template("register.html")
 
+# ------------------------
+# Account Number Generator
+# ------------------------
+
+import random
+
+def generate_account_number():
+    return str(random.randint(10000000, 99999999))
+
 # -----------
 # Login Route
 # -----------
@@ -58,6 +67,38 @@ def login():
 
     return render_template("login.html")
 
+
+# ----------------
+# Admin Page Route
+# ----------------
+
+@app.route("/admin")
+def admin():
+    if not session.get("is_admin"):
+        return "Unauthorized"
+
+    users = User.query.filter_by(approved=False).all()
+    return render_template("admin.html", users=users)
+
+
+# ------------------
+# Approve User Route
+# ------------------
+
+@app.route("/approve/<int:user_id>")
+def approve(user_id):
+    if not session.get("is_admin"):
+        return "Unauthorized"
+
+    user = User.query.get(user_id)
+
+    user.approved = True
+    user.account_number = generate_account_number()
+
+    db.session.commit()
+
+    return redirect("/admin")
+
 # ---------------------------
 # Dashboard Route (Temporary)
 # ---------------------------
@@ -68,7 +109,7 @@ def dashboard():
         return redirect("/login")
 
     user = User.query.get(session["user_id"])
-    return f"Welcome {user.first_name}, Balance: {user.balance}"
+    return render_template("dashboard.html", user=user)
 
 if __name__ == "__main__":
     with app.app_context():

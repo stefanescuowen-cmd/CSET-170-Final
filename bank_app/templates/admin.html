@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Admin Panel</h2>
+
+<h3>Pending Users</h3>
+
+{% for user in users %}
+    <p>
+        {{ user.username }} - {{ user.first_name }} {{ user.last_name }}
+        <a href="/approve/{{ user.id }}">Approve</a>
+    </p>
+{% endfor %}
+
+{% endblock %}

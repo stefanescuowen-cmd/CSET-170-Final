@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bank App</title>
+</head>
+<body>
+    <header>
+        <h1>Banking System</h1>
+
+        <nav>
+            <a href="/register">Register</a> |
+            <a href="/login">Login</a> |
+            <a href="/dashboard">Dashboard</a> |
+            <a href="/transfer">Transfer</a> |
+            <a href="/admin">Admin</a>
+        </nav>
+
+        <hr>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <hr>
+        <p>© 2026 Banking App</p>
+    </footer>
+</body>
+</html>
