@@ -1,0 +1,91 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+
+header, footer {
+    background-color: #222;
+    color: #fff;
+    padding: 10px 20px;
+}
+
+header nav a {
+    color: #fff;
+    margin-right: 10px;
+    text-decoration: none;
+}
+
+header nav a:hover {
+    text-decoration: underline;
+}
+
+fieldset {
+    padding: 15px;
+    border: 2px solid #333;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+legend {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+input {
+    padding: 5px;
+    margin: 5px 0;
+    width: 200px;
+}
+
+button {
+    padding: 5px 15px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+/* Flash messages */
+.flash-success {
+    color: #4caf50; /* soft green */
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.flash-error {
+    color: #c94c4c; /* soft red */
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Pending Users Table */
+.pending-users {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.pending-users th, .pending-users td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.pending-users th {
+    background-color: #f0f0f0;
+}
+
+.approve-btn {
+    padding: 5px 10px;
+    background-color: #4caf50;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+}
+
+.approve-btn:hover {
+    background-color: #45a049;
+}

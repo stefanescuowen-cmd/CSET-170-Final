@@ -3,39 +3,53 @@
 {% block content %}
 <h2>My Account</h2>
 
-<p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
-<p><strong>Username:</strong> {{ user.username }}</p>
-<p><strong>Account Number:</strong> {{ user.account_number }}</p>
-<p><strong>Balance:</strong> ${{ user.balance }}</p>
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul class="flash-messages">
+        {% for category, message in messages %}
+            <li class="flash-{{ category }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
 
-<hr>
+<!-- User Info -->
+<fieldset class="account-info">
+    <legend>Account Info</legend>
+    <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Account Number:</strong> {{ user.account_number }}</p>
+    <p><strong>Balance:</strong> ${{ "%.2f"|format(user.balance) }}</p>
+</fieldset>
 
-<h3>Contact Info</h3>
-<p><strong>Address:</strong> {{ user.address }}</p>
-<p><strong>Phone:</strong> {{ user.phone }}</p>
+<!-- Contact Info -->
+<fieldset class="contact-info">
+    <legend>Contact Info</legend>
+    <p><strong>Address:</strong> {{ user.address }}</p>
+    <p><strong>Phone:</strong> {{ user.phone }}</p>
+</fieldset>
 
-<hr>
+<!-- Deposit Money -->
+<fieldset class="deposit-form">
+    <legend>Deposit Money</legend>
+    <form action="/deposit" method="POST">
+        <input name="card_number" placeholder="Card Number" required><br>
+        <input name="expiry" placeholder="Expiry Date" required><br>
+        <input name="ccv" placeholder="CCV" required><br>
+        <input name="amount" placeholder="Amount" required><br>
+        <button type="submit">Deposit</button>
+    </form>
+</fieldset>
 
-<h3>Actions</h3>
-
-<!-- Deposit Form -->
-<form action="/deposit" method="POST">
-    <h4>Deposit Money</h4>
-    <input name="card_number" placeholder="Card Number"><br>
-    <input name="expiry" placeholder="Expiry Date"><br>
-    <input name="ccv" placeholder="CCV"><br>
-    <input name="amount" placeholder="Amount"><br>
-    <button type="submit">Deposit</button>
-</form>
-
-<br>
-
-<!-- Transfer Form -->
-<form action="/transfer" method="POST">
-    <h4>Send Money</h4>
-    <input name="account_number" placeholder="Recipient Account Number"><br>
-    <input name="amount" placeholder="Amount"><br>
-    <button type="submit">Send</button>
-</form>
+<!-- Send Money -->
+<fieldset class="transfer-form">
+    <legend>Send Money</legend>
+    <form action="/transfer" method="POST">
+        <input name="account_number" placeholder="Recipient Account Number" required><br>
+        <input name="amount" placeholder="Amount" required><br>
+        <button type="submit">Send</button>
+    </form>
+</fieldset>
 
 {% endblock %}
