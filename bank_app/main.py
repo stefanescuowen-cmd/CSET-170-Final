@@ -44,33 +44,34 @@ def register():
 
     return render_template("register.html")
 
-# -----------
+# ----------- 
 # Login Route
 # -----------
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    # Redirect logged-in users to dashboard
+    if "user_id" in session:
+        return redirect("/dashboard")
+
     if request.method == "POST":
         user = User.query.filter_by(username=request.form["username"]).first()
 
-        # Check if user exists
-        if not user:
-            return "Invalid credentials"
+        if not user or not check_password_hash(user.password, request.form["password"]):
+            flash("Invalid credentials", "error")
+            return redirect("/login")
 
-        # Check password hash
-        if not check_password_hash(user.password, request.form["password"]):
-            return "Invalid credentials"
-
-        # Only block approval for non-admin users
         if not user.approved and not user.is_admin:
-            return "Waiting for admin approval"
+            flash("Waiting for admin approval", "info")
+            return redirect("/login")
 
         # Success: log in
         session["user_id"] = user.id
         session["is_admin"] = user.is_admin
-
+        flash(f"Welcome, {user.first_name}!", "success")
         return redirect("/dashboard")
 
     return render_template("login.html")
+
 
 # ------------
 # Logout Route
@@ -191,29 +192,39 @@ def dashboard():
     user = User.query.get(session["user_id"])
     return render_template("dashboard.html", user=user)
 
-# -----------
-# Run the app
-# -----------
+# -------------------------
+# Run the app / Admin Setup
+# -------------------------
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()  # create tables if they don't exist
 
-        # Create default admin if it doesn't exist
+        # Check if admin exists
         admin_user = User.query.filter_by(username="admin").first()
+
         if not admin_user:
-            admin = User(
+            # Create default admin
+            admin_user = User(
                 username="admin",
                 first_name="Admin",
                 last_name="User",
                 ssn="000-00-0000",
                 address="Bank HQ",
                 phone="1234567890",
-                password=generate_password_hash("admin123"),  # ensure password matches login
+                password=generate_password_hash("admin123"),  # password to match your login
                 approved=True,
                 is_admin=True
             )
-            db.session.add(admin)
+            db.session.add(admin_user)
             db.session.commit()
             print("Default admin created: username=admin, password=admin123")
+        else:
+            # Optional: ensure admin has correct password and flags (dev convenience)
+            admin_user.password = generate_password_hash("admin123")
+            admin_user.approved = True
+            admin_user.is_admin = True
+            db.session.commit()
+            print("Admin already exists — password reset to 'admin123' for consistency")
 
     app.run(debug=True)
