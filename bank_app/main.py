@@ -69,3 +69,8 @@ def dashboard():
 
     user = User.query.get(session["user_id"])
     return f"Welcome {user.first_name}, Balance: {user.balance}"
+
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
