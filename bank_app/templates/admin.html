@@ -14,9 +14,11 @@
     {% endif %}
 {% endwith %}
 
+<!-- Pending Users Section -->
+
 <h3>Pending Users</h3>
 
-{% if users %}
+{% if pending_users %}
     <table class="pending-users">
         <thead>
             <tr>
@@ -29,20 +31,58 @@
             </tr>
         </thead>
         <tbody>
-        {% for user in users %}
+        {% for user in pending_users %}
             <tr>
                 <td>{{ user.username }}</td>
                 <td>{{ user.first_name }} {{ user.last_name }}</td>
                 <td>{{ user.ssn }}</td>
                 <td>{{ user.address }}</td>
                 <td>{{ user.phone }}</td>
-                <td><a class="approve-btn" href="/approve/{{ user.id }}">Approve</a></td>
+                <td>
+                    <a class="approve-btn" href="/approve/{{ user.id }}">Approve</a>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 {% else %}
     <p>No pending users.</p>
+{% endif %}
+
+<hr>
+
+
+<!-- All Users Section -->
+
+<h3>All Users</h3>
+
+{% if all_users %}
+    <table class="all-users">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Approved</th>
+                <th>Admin</th>
+                <th>Account #</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user in all_users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                <td>{{ user.approved }}</td>
+                <td>{{ user.is_admin }}</td>
+                <td>{{ user.account_number or "N/A" }}</td>
+                <td>${{ "%.2f"|format(user.balance) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No users found.</p>
 {% endif %}
 
 {% endblock %}

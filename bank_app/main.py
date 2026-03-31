@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, session, flash, get
 from config import Config
 from models import db
 from models.user import User
+from models.transaction import Transaction
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
 
@@ -92,8 +93,10 @@ def admin_page():
     if not session.get("is_admin"):
         return "Unauthorized"
 
-    users = User.query.filter_by(approved=False).all()
-    return render_template("admin.html", users=users)
+    pending_users = User.query.filter_by(approved=False).all()
+    all_users = User.query.all()
+
+    return render_template("admin.html", pending_users=pending_users, all_users=all_users)
 
 # ------------------
 # Approve User Route
@@ -115,6 +118,35 @@ def approve(user_id):
     db.session.commit()
     flash(f"User {user.username} approved successfully!", "success")
     return redirect("/admin")
+
+# -----------------
+# Delete User Route
+# -----------------
+
+@app.route("/delete/<int:user_id>")
+def delete_user(user_id):
+    if not session.get("is_admin"):
+        return "Unauthorized"
+
+    user = User.query.get(user_id)
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        flash("User deleted", "success")
+
+    return redirect("/admin")
+
+# -----------------------
+# View User Details Route
+# -----------------------
+
+@app.route("/user/<int:user_id>")
+def view_user(user_id):
+    if not session.get("is_admin"):
+        return "Unauthorized"
+
+    user = User.query.get(user_id)
+    return render_template("user_detail.html", user=user)
 
 # -------------
 # Deposit Route
@@ -190,9 +222,18 @@ def transfer():
         if sender.balance < amount:
             flash("Insufficient funds", "error")
             return redirect("/transfer")
-
+        
         sender.balance -= amount
         recipient.balance += amount
+
+        txn = Transaction(
+            sender_id=sender.id,
+            recipient_id=recipient.id,
+            amount=amount,
+            type="transfer"
+        )
+        db.session.add(txn)
+
         db.session.commit()
 
         flash(f"Transferred ${amount:.2f} to {recipient.username} successfully!", "success")
@@ -202,11 +243,15 @@ def transfer():
 
 # ---------------------------
 # Dashboard Route
-# ---------------------------
+# --------------------------
 @app.route("/dashboard")
 def dashboard():
     if "user_id" not in session:
         return redirect("/login")
+
+    # Prevent the admin from using user dashboard
+    if session.get("is_admin"):
+        return redirect("/admin")
 
     user = User.query.get(session["user_id"])
     return render_template("dashboard.html", user=user)
@@ -238,6 +283,13 @@ if __name__ == "__main__":
             db.session.add(admin_user)
             db.session.commit()
             print("Default admin created: username=admin, password=admin123")
+            
+            admin_user.account_number = None
+            admin_user.balance = 0
+
+            db.session.add(admin_user)
+            db.session.commit()
+
         else:
             # Optional: ensure admin has correct password and flags (dev convenience)
             admin_user.password = generate_password_hash("admin123")
@@ -245,5 +297,10 @@ if __name__ == "__main__":
             admin_user.is_admin = True
             db.session.commit()
             print("Admin already exists — password reset to 'admin123' for consistency")
+
+            admin_user.account_number = None
+            admin_user.balance = 0
+
+            db.session.commit()
 
     app.run(debug=True)

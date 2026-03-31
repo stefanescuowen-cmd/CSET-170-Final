@@ -10,24 +10,23 @@
         <h1>Banking System</h1>
 
         <nav>
-    {% if session.get('user_id') %}
-        <a href="/dashboard">Dashboard</a>
+            {% if session.get('user_id') %}
 
-        {% if not session.get('is_admin') %}
+            {% if session.get('is_admin') %}
+            <a href="/admin">Admin Dashboard</a>
+            {% else %}
+            <a href="/dashboard">Dashboard</a>
             <a href="/deposit">Deposit</a>
             <a href="/transfer">Transfer</a>
-        {% endif %}
+            {% endif %}
 
-        {% if session.get('is_admin') %}
-            | <a href="/admin">Admin</a>
-        {% endif %}
+            | <a href="/logout">Logout</a>
 
-        | <a href="/logout">Logout</a>
-    {% else %}
-        <a href="/register">Register</a> |
-        <a href="/login">Login</a>
-    {% endif %}
-</nav>
+            {% else %}
+            <a href="/register">Register</a> |
+            <a href="/login">Login</a>
+            {% endif %}
+        </nav>
 
         <hr>
 
