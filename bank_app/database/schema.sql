@@ -14,3 +14,6 @@ CREATE TABLE users (
     account_number TEXT UNIQUE,
     balance REAL DEFAULT 0.0
 );
+
+INSERT INTO users (username, first_name, last_name, ssn, address, phone, password, approved, is_admin)
+VALUES ('admin', 'Admin', 'User', '000-00-0000', 'Bank HQ', '1234567890', '<hashed_password>', 1, 1);

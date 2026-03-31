@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bank App</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Banking System</h1>
+
+        <nav>
+            {% if session.get('user_id') %}
+
+            {% if session.get('is_admin') %}
+            <a href="/admin">Admin Dashboard</a>
+            {% else %}
+            <a href="/dashboard">Dashboard</a>
+            <a href="/deposit">Deposit</a>
+            <a href="/transfer">Transfer</a>
+            <a href="/statement">Statement</a>
+            {% endif %}
+
+            | <a href="/logout">Logout</a>
+
+            {% else %}
+            <a href="/register">Register</a> |
+            <a href="/login">Login</a>
+            {% endif %}
+        </nav>
+
+        <hr>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="flashes">
+              {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <hr>
+        <p>© 2026 Banking App</p>
+    </footer>
+</body>
+</html>
