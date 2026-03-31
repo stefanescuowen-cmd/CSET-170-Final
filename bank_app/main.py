@@ -173,6 +173,7 @@ def statement():
 # -------------
 # Deposit Route
 # -------------
+
 @app.route("/deposit", methods=["GET", "POST"])
 def deposit():
     if "user_id" not in session or session.get("is_admin"):
@@ -205,8 +206,8 @@ def deposit():
             type="deposit"
         )
         db.session.add(txn)
-
         db.session.commit()
+        
         flash(f"${amount:.2f} deposited successfully!", "success")
         return redirect("/dashboard")
 
