@@ -51,7 +51,6 @@
 
 <hr>
 
-
 <!-- All Users Section -->
 
 <h3>All Users</h3>
@@ -66,6 +65,7 @@
                 <th>Admin</th>
                 <th>Account #</th>
                 <th>Balance</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -77,6 +77,19 @@
                 <td>{{ user.is_admin }}</td>
                 <td>{{ user.account_number or "N/A" }}</td>
                 <td>${{ "%.2f"|format(user.balance) }}</td>
+
+                <td>
+                    {% if not user.is_admin %}
+                        <a class="delete-btn"
+                           href="/delete/{{ user.id }}"
+                           onclick="return confirm('Are you sure you want to delete this user?');">
+                           Delete
+                        </a>
+                    {% else %}
+                        <span>Protected</span>
+                    {% endif %}
+                </td>
+
             </tr>
         {% endfor %}
         </tbody>

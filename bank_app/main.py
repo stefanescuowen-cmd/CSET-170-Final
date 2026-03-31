@@ -129,10 +129,13 @@ def delete_user(user_id):
         return "Unauthorized"
 
     user = User.query.get(user_id)
-    if user:
+
+    if user and not user.is_admin:
         db.session.delete(user)
         db.session.commit()
         flash("User deleted", "success")
+    else:
+        flash("Cannot delete admin", "error")
 
     return redirect("/admin")
 
