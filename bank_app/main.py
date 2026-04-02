@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, redirect, session, flash, get_flashed_messages
+from functools import wraps
 from config import Config
 from models import db
 from models.user import User
 from models.transaction import Transaction
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
-
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -19,6 +19,24 @@ def generate_account_number():
         number = str(random.randint(10000000, 99999999))
         if not User.query.filter_by(account_number=number).first():
             return number
+
+# ------------------------
+# Authentication helpers
+# ------------------------
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
+            flash("Please log in to access this page.", "error")
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
+
+def get_current_user():
+    user_id = session.get("user_id")
+    if not user_id:
+        return None
+    return User.query.get(user_id)
 
 # --------------
 # Register Route
@@ -175,100 +193,43 @@ def statement():
 # -------------
 
 @app.route("/deposit", methods=["GET", "POST"])
+@login_required
 def deposit():
-    if "user_id" not in session or session.get("is_admin"):
-        flash("Unauthorized", "error")
-        return redirect("/login")
-
-    user = User.query.get(session["user_id"])
-    if not user:
-        session.clear()
-        flash("User not found. Please log in again.", "error")
-        return redirect("/login")
-
+    user = get_current_user()
     if request.method == "POST":
         try:
             amount = float(request.form["amount"])
-        except (ValueError, TypeError):
-            flash("Invalid amount", "error")
-            return redirect("/deposit")
-
-        if amount <= 0:
-            flash("Amount must be positive", "error")
-            return redirect("/deposit")
-
-        user.balance += amount
-
-        txn = Transaction(
-            sender_id=user.id,
-            recipient_id=user.id,
-            amount=amount,
-            type="deposit"
-        )
-        db.session.add(txn)
-        db.session.commit()
-        
-        flash(f"${amount:.2f} deposited successfully!", "success")
-        return redirect("/dashboard")
-
+            if amount <= 0: raise ValueError
+            
+            user.balance += amount
+            db.session.add(Transaction(sender_id=user.id, recipient_id=user.id, amount=amount, type="deposit"))
+            db.session.commit()
+            flash(f"${amount:.2f} deposited!", "success")
+            return redirect("/dashboard")
+        except ValueError:
+            flash("Invalid positive amount required", "error")
+            
     return render_template("deposit.html")
 
-# --------------
-# Transfer Route
-# --------------
 @app.route("/transfer", methods=["GET", "POST"])
+@login_required
 def transfer():
-    if "user_id" not in session or session.get("is_admin"):
-        flash("Unauthorized", "error")
-        return redirect("/login")
-
-    sender = User.query.get(session["user_id"])
-    if not sender:
-        session.clear()
-        flash("User not found. Please log in again.", "error")
-        return redirect("/login")
-
+    sender = get_current_user()
     if request.method == "POST":
-        recipient_account = request.form.get("account_number")
+        recipient = User.query.filter_by(account_number=request.form.get("account_number")).first()
+        amount = float(request.form.get("amount", 0))
 
-        try:
-            amount = float(request.form.get("amount"))
-        except (ValueError, TypeError):
-            flash("Invalid amount", "error")
-            return redirect("/transfer")
-
-        if amount <= 0:
-            flash("Amount must be positive", "error")
-            return redirect("/transfer")
-
-        recipient = User.query.filter_by(account_number=recipient_account).first()
-        if not recipient:
-            flash("Recipient not found", "error")
-            return redirect("/transfer")
-
-        if recipient.id == sender.id:
-            flash("You cannot transfer money to yourself.", "error")
-            return redirect("/transfer")
-
-        if sender.balance < amount:
+        if not recipient or recipient.id == sender.id:
+            flash("Invalid recipient", "error")
+        elif sender.balance < amount:
             flash("Insufficient funds", "error")
-            return redirect("/transfer")
-        
-        sender.balance -= amount
-        recipient.balance += amount
-
-        txn = Transaction(
-            sender_id=sender.id,
-            recipient_id=recipient.id,
-            amount=amount,
-            type="transfer"
-        )
-        db.session.add(txn)
-
-        db.session.commit()
-
-        flash(f"Transferred ${amount:.2f} to {recipient.username} successfully!", "success")
-        return redirect("/dashboard")
+        else:
+            sender.balance -= amount
+            recipient.balance += amount
+            db.session.add(Transaction(sender_id=sender.id, recipient_id=recipient.id, amount=amount, type="transfer"))
+            db.session.commit()
+            flash("Transfer successful!", "success")
+            return redirect("/dashboard")
 
     return render_template("transfer.html")
 
