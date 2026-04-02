@@ -89,3 +89,139 @@ button {
 .approve-btn:hover {
     background-color: #45a049;
 }
+
+/* Core Reset & Theme Variables */
+/* Core Reset & Theme Variables */
+:root {
+    --bg-dark: #120d1d;
+    --card-bg: #1e162d;
+    --accent-purple: #8b5cf6;
+    --accent-glow: #a78bfa;
+    --text-main: #f3f4f6;
+    --text-dim: #a7a7bc;
+    --danger: #ef4444;
+    --success: #10b981;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    min-height: 100vh; /* Ensures the body covers full screen height */
+}
+
+/* Centering Logic */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers horizontally */
+    justify-content: center; /* Centers vertically if there's space */
+    min-height: 100vh; 
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Form Container Styling */
+form {
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    width: 100%;
+    max-width: 400px; /* Limits width for a sleek look */
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    margin: 20px 0;
+}
+
+/* Typography & Titles */
+h2 {
+    color: var(--accent-glow);
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 2rem;
+}
+
+h3 {
+    color: var(--accent-glow);
+    width: 100%;
+    max-width: 1000px; /* Wider for tables */
+}
+
+/* Input Fields */
+input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    background: #2d243d;
+    border: 1px solid #3f3552;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+    background: #342a47;
+}
+
+/* Button Styling */
+button {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent-purple);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    background: var(--accent-glow);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+}
+
+/* Tables (Center-aligned on page) */
+table {
+    width: 100%;
+    max-width: 1000px;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 20px auto;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+th {
+    background: rgba(139, 92, 246, 0.15);
+    color: var(--accent-glow);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+/* Navigation Links */
+a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: var(--accent-glow);
+
+}

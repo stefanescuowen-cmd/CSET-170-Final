@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, redirect, session, flash, get_flashed_messages
+from functools import wraps
 from config import Config
 from models import db
 from models.user import User
 from models.transaction import Transaction
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
-
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -19,6 +19,24 @@ def generate_account_number():
         number = str(random.randint(10000000, 99999999))
         if not User.query.filter_by(account_number=number).first():
             return number
+
+# ------------------------
+# Authentication helpers
+# ------------------------
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
+            flash("Please log in to access this page.", "error")
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
+
+def get_current_user():
+    user_id = session.get("user_id")
+    if not user_id:
+        return None
+    return User.query.get(user_id)
 
 # --------------
 # Register Route
@@ -175,8 +193,8 @@ def statement():
 # -------------
 
 @app.route("/deposit", methods=["GET", "POST"])
+@login_required
 def deposit():
-    # Only logged-in non-admin users can deposit
     if "user_id" not in session or session.get("is_admin"):
         flash("Unauthorized", "error")
         return redirect("/login")
@@ -204,16 +222,13 @@ def deposit():
             flash("Amount must be positive", "error")
             return redirect("/deposit")
 
-        # Update user balance
         user.balance += amount
 
-        # Log transaction (optional: show last 4 digits of card)
         txn = Transaction(
             sender_id=user.id,
             recipient_id=user.id,
             amount=amount,
-            type="deposit",
-           description=f"Deposit via card ending {card_number[-4:]}, exp {expiry_date}"
+            type="deposit"
         )
         db.session.add(txn)
         db.session.commit()
@@ -221,47 +236,19 @@ def deposit():
         flash(f"${amount:.2f} deposited successfully!", "success")
         return redirect("/dashboard")
 
-    # GET request: show deposit form
     return render_template("deposit.html")
 
-# --------------
-# Transfer Route
-# --------------
 @app.route("/transfer", methods=["GET", "POST"])
+@login_required
 def transfer():
-    if "user_id" not in session or session.get("is_admin"):
-        flash("Unauthorized", "error")
-        return redirect("/login")
-
-    sender = User.query.get(session["user_id"])
-    if not sender:
-        session.clear()
-        flash("User not found. Please log in again.", "error")
-        return redirect("/login")
-
+    sender = get_current_user()
     if request.method == "POST":
-        recipient_account = request.form.get("account_number")
+        recipient = User.query.filter_by(account_number=request.form.get("account_number")).first()
+        amount = float(request.form.get("amount", 0))
 
-        try:
-            amount = float(request.form.get("amount"))
-        except (ValueError, TypeError):
-            flash("Invalid amount", "error")
-            return redirect("/transfer")
-
-        if amount <= 0:
-            flash("Amount must be positive", "error")
-            return redirect("/transfer")
-
-        recipient = User.query.filter_by(account_number=recipient_account).first()
-        if not recipient:
-            flash("Recipient not found", "error")
-            return redirect("/transfer")
-
-        if recipient.id == sender.id:
-            flash("You cannot transfer money to yourself.", "error")
-            return redirect("/transfer")
-
-        if sender.balance < amount:
+        if not recipient or recipient.id == sender.id:
+            flash("Invalid recipient", "error")
+        elif sender.balance < amount:
             flash("Insufficient funds", "error")
             return redirect("/transfer")
         
@@ -272,8 +259,7 @@ def transfer():
             sender_id=sender.id,
             recipient_id=recipient.id,
             amount=amount,
-            type="transfer",
-            description=f"Transferred ${amount:.2f} to {recipient.username}"
+            type="transfer"
         )
         db.session.add(txn)
 
