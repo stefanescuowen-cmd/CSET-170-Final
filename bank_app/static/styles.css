@@ -1,12 +1,47 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
-    line-height: 1.5;
+/* -------------------------
+   Core Reset & Theme Variables
+-------------------------- */
+:root {
+    --bg-dark: #120d1d;
+    --card-bg: #1e162d;
+    --accent-purple: #8b5cf6;
+    --accent-glow: #a78bfa;
+    --text-main: #f3f4f6;
+    --text-dim: #a7a7bc;
+    --danger: #ef4444;
+    --success: #10b981;
+}
+
+/* Global Reset */
+*, *::before, *::after {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+/* -------------------------
+   Layout Containers
+-------------------------- */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center horizontally */
+    justify-content: center; /* Center vertically if enough space */
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* -------------------------
+   Header & Footer
+-------------------------- */
 header, footer {
     background-color: #222;
     color: #fff;
@@ -23,12 +58,30 @@ header nav a:hover {
     text-decoration: underline;
 }
 
+/* -------------------------
+   Typography
+-------------------------- */
+h2, h3 {
+    color: var(--accent-glow);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h3 {
+    text-align: left;
+    max-width: 1000px;
+    margin: 20px auto 10px auto;
+}
+
+/* -------------------------
+   Fieldsets & Forms
+-------------------------- */
 fieldset {
     padding: 15px;
-    border: 2px solid #333;
+    border: 2px solid rgba(139, 92, 246, 0.2);
     margin-bottom: 20px;
-    border-radius: 5px;
-    background-color: #fff;
+    border-radius: 8px;
+    background-color: var(--card-bg);
 }
 
 legend {
@@ -36,119 +89,20 @@ legend {
     font-size: 1.1em;
 }
 
-input {
-    padding: 5px;
-    margin: 5px 0;
-    width: 200px;
-}
-
-button {
-    padding: 5px 15px;
-    margin-top: 10px;
-    cursor: pointer;
-}
-
-/* Flash messages */
-.flash-success {
-    color: #4caf50; /* soft green */
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.flash-error {
-    color: #c94c4c; /* soft red */
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-/* Pending Users Table */
-.pending-users {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-}
-
-.pending-users th, .pending-users td {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: left;
-}
-
-.pending-users th {
-    background-color: #f0f0f0;
-}
-
-.approve-btn {
-    padding: 5px 10px;
-    background-color: #4caf50;
-    color: white;
-    text-decoration: none;
-    border-radius: 3px;
-}
-
-.approve-btn:hover {
-    background-color: #45a049;
-}
-
-/* Core Reset & Theme Variables */
-/* Core Reset & Theme Variables */
-:root {
-    --bg-dark: #120d1d;
-    --card-bg: #1e162d;
-    --accent-purple: #8b5cf6;
-    --accent-glow: #a78bfa;
-    --text-main: #f3f4f6;
-    --text-dim: #a7a7bc;
-    --danger: #ef4444;
-    --success: #10b981;
-}
-
-body {
-    background-color: var(--bg-dark);
-    color: var(--text-main);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    margin: 0;
-    min-height: 100vh; /* Ensures the body covers full screen height */
-}
-
-/* Centering Logic */
-.container {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centers horizontally */
-    justify-content: center; /* Centers vertically if there's space */
-    min-height: 100vh; 
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-/* Form Container Styling */
 form {
     background: var(--card-bg);
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.4);
     width: 100%;
-    max-width: 400px; /* Limits width for a sleek look */
+    max-width: 400px;
     border: 1px solid rgba(139, 92, 246, 0.2);
     margin: 20px 0;
 }
 
-/* Typography & Titles */
-h2 {
-    color: var(--accent-glow);
-    text-align: center;
-    margin-bottom: 24px;
-    font-size: 2rem;
-}
-
-h3 {
-    color: var(--accent-glow);
-    width: 100%;
-    max-width: 1000px; /* Wider for tables */
-}
-
-/* Input Fields */
+/* -------------------------
+   Inputs & Buttons
+-------------------------- */
 input {
     width: 100%;
     padding: 14px;
@@ -156,9 +110,8 @@ input {
     background: #2d243d;
     border: 1px solid #3f3552;
     border-radius: 8px;
-    color: white;
+    color: var(--text-main);
     font-size: 1rem;
-    box-sizing: border-box;
     transition: all 0.3s ease;
 }
 
@@ -169,7 +122,6 @@ input:focus {
     background: #342a47;
 }
 
-/* Button Styling */
 button {
     width: 100%;
     padding: 14px;
@@ -189,7 +141,30 @@ button:hover {
     box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
 }
 
-/* Tables (Center-aligned on page) */
+/* -------------------------
+   Flash Messages
+-------------------------- */
+.flash-success {
+    color: var(--success);
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.flash-error {
+    color: var(--danger);
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.flash-info {
+    color: var(--accent-glow);
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* -------------------------
+   Tables
+-------------------------- */
 table {
     width: 100%;
     max-width: 1000px;
@@ -213,7 +188,38 @@ th {
     text-transform: uppercase;
 }
 
-/* Navigation Links */
+/* -------------------------
+   Table Buttons
+-------------------------- */
+.approve-btn, .delete-btn {
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #fff;
+    transition: all 0.2s ease;
+}
+
+.approve-btn {
+    background-color: var(--success);
+}
+
+.approve-btn:hover {
+    background-color: #059669;
+}
+
+.delete-btn {
+    background-color: var(--danger);
+}
+
+.delete-btn:hover {
+    background-color: #dc2626;
+}
+
+/* -------------------------
+   Links
+-------------------------- */
 a {
     color: var(--text-dim);
     text-decoration: none;
@@ -223,5 +229,4 @@ a {
 
 a:hover {
     color: var(--accent-glow);
-
 }
