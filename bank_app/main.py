@@ -129,10 +129,13 @@ def delete_user(user_id):
         return "Unauthorized"
 
     user = User.query.get(user_id)
-    if user:
+
+    if user and not user.is_admin:
         db.session.delete(user)
         db.session.commit()
         flash("User deleted", "success")
+    else:
+        flash("Cannot delete admin", "error")
 
     return redirect("/admin")
 
@@ -148,9 +151,29 @@ def view_user(user_id):
     user = User.query.get(user_id)
     return render_template("user_detail.html", user=user)
 
+# ---------------
+# Statement Route
+# ---------------
+
+@app.route("/statement")
+def statement():
+    if "user_id" not in session or session.get("is_admin"):
+        flash("Unauthorized", "error")
+        return redirect("/login")
+
+    user = User.query.get(session["user_id"])
+
+    transactions = Transaction.query.filter(
+        (Transaction.sender_id == user.id) |
+        (Transaction.recipient_id == user.id)
+    ).all()
+
+    return render_template("statement.html", transactions=transactions, user=user)
+
 # -------------
 # Deposit Route
 # -------------
+
 @app.route("/deposit", methods=["GET", "POST"])
 def deposit():
     if "user_id" not in session or session.get("is_admin"):
@@ -175,12 +198,20 @@ def deposit():
             return redirect("/deposit")
 
         user.balance += amount
+
+        txn = Transaction(
+            sender_id=user.id,
+            recipient_id=user.id,
+            amount=amount,
+            type="deposit"
+        )
+        db.session.add(txn)
         db.session.commit()
+        
         flash(f"${amount:.2f} deposited successfully!", "success")
         return redirect("/dashboard")
 
     return render_template("deposit.html")
-
 
 # --------------
 # Transfer Route
