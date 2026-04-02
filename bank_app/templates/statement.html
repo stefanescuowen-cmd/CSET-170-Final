@@ -3,22 +3,37 @@
 {% block content %}
 <h2>Bank Statement</h2>
 
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul class="flash-messages">
+        {% for category, message in messages %}
+            <li class="flash-{{ category }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
 {% if transactions %}
 <table>
     <thead>
         <tr>
+            <th>Date</th>
             <th>Type</th>
             <th>From</th>
             <th>To</th>
+            <th>Description</th>
             <th>Amount</th>
         </tr>
     </thead>
     <tbody>
     {% for txn in transactions %}
         <tr>
-            <td>{{ txn.type }}</td>
-            <td>{{ txn.sender_id }}</td>
-            <td>{{ txn.recipient_id }}</td>
+            <td>{{ txn.timestamp.strftime("%Y-%m-%d %H:%M") if txn.timestamp else "N/A" }}</td>
+            <td>{{ txn.type|capitalize }}</td>
+            <td>{{ txn.sender.username if txn.sender else "N/A" }}</td>
+            <td>{{ txn.recipient.username if txn.recipient else "N/A" }}</td>
+            <td>{{ txn.description or "-" }}</td>
             <td>${{ "%.2f"|format(txn.amount) }}</td>
         </tr>
     {% endfor %}
@@ -28,4 +43,5 @@
 <p>No transactions yet.</p>
 {% endif %}
 
+<a href="/dashboard">Back to Dashboard</a>
 {% endblock %}

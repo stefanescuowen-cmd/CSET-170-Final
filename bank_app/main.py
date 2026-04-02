@@ -176,6 +176,7 @@ def statement():
 
 @app.route("/deposit", methods=["GET", "POST"])
 def deposit():
+    # Only logged-in non-admin users can deposit
     if "user_id" not in session or session.get("is_admin"):
         flash("Unauthorized", "error")
         return redirect("/login")
@@ -187,6 +188,12 @@ def deposit():
         return redirect("/login")
 
     if request.method == "POST":
+        # Get card info from form
+        card_number = request.form.get("card_number")
+        expiry_date = request.form.get("expiry_date")
+        ccv = request.form.get("ccv")
+
+        # Validate amount
         try:
             amount = float(request.form["amount"])
         except (ValueError, TypeError):
@@ -197,13 +204,16 @@ def deposit():
             flash("Amount must be positive", "error")
             return redirect("/deposit")
 
+        # Update user balance
         user.balance += amount
 
+        # Log transaction (optional: show last 4 digits of card)
         txn = Transaction(
             sender_id=user.id,
             recipient_id=user.id,
             amount=amount,
-            type="deposit"
+            type="deposit",
+           description=f"Deposit via card ending {card_number[-4:]}, exp {expiry_date}"
         )
         db.session.add(txn)
         db.session.commit()
@@ -211,6 +221,7 @@ def deposit():
         flash(f"${amount:.2f} deposited successfully!", "success")
         return redirect("/dashboard")
 
+    # GET request: show deposit form
     return render_template("deposit.html")
 
 # --------------
@@ -261,7 +272,8 @@ def transfer():
             sender_id=sender.id,
             recipient_id=recipient.id,
             amount=amount,
-            type="transfer"
+            type="transfer",
+            description=f"Transferred ${amount:.2f} to {recipient.username}"
         )
         db.session.add(txn)
 
