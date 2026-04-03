@@ -1,88 +1,17 @@
 {% extends "base.html" %}
 
 {% block content %}
-<style>
-    /* Reusing the Dark Modern Theme */
-    :root {
-        --bg-color: #0f172a;
-        --card-bg: #1e293b;
-        --accent: #38bdf8;
-        --text-main: #f8fafc;
-        --text-muted: #94a3b8;
-        --border: #334155;
-    }
-
-    .login-container {
-        background-color: var(--bg-color);
-        color: var(--text-main);
-        font-family: 'Inter', sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 80vh;
-        padding: 2rem;
-    }
-
-    h2 {
-        font-size: 2rem;
-        margin-bottom: 1.5rem;
-        color: var(--accent);
-    }
-
-    form {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 2.5rem;
-        width: 100%;
-        max-width: 350px;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
-    }
-
-    input {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 1.2rem;
-        background: var(--bg-color);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        color: var(--text-main);
-        font-size: 1rem;
-        outline: none;
-        box-sizing: border-box; /* Prevents input from overflowing */
-    }
-
-    input:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
-    }
-
-    button {
-        width: 100%;
-        background: var(--accent);
-        color: var(--bg-color);
-        border: none;
-        padding: 12px;
-        border-radius: 6px;
-        font-weight: 700;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: transform 0.2s, background 0.2s;
-    }
-
-    button:hover {
-        background: #7dd3fc;
-        transform: translateY(-1px);
-    }
-</style>
-
 <div class="login-container">
     <h2>Login</h2>
 
     <form method="POST">
         <input name="username" placeholder="Username" required>
-        <input name="password" type="password" placeholder="Password" required>
+
+        <div class="password-field">
+            <input id="password" name="password" type="password" placeholder="Password" required>
+            <i id="toggle-password" class="fa-solid fa-eye eye-icon"></i>
+        </div>
+
         <button type="submit">Login</button>
     </form>
 </div>

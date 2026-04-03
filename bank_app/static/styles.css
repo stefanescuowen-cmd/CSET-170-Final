@@ -230,3 +230,67 @@ a {
 a:hover {
     color: var(--accent-glow);
 }
+
+/* -------------------------
+   password toggle & blur effect
+-------------------------- */
+
+.sensitive.blue{
+    filter: blur(6px);
+    user-select: none;
+}
+
+/* Password eye toggle */
+.password-field {
+    position: relative;
+}
+
+.password-field input {
+    width: 100%;
+    padding-right: 40px;
+}
+
+/* Blur effect */
+.blurred {
+    filter: blur(6px);
+    user-select: none;
+}
+
+/* Toggle button */
+.blur-btn {
+    margin-bottom: 15px;
+    padding: 8px 15px;
+    background: #444;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.blur-btn:hover {
+    background: #666;
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.toggle-eye {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.toggle-eye.eye-closed {
+    background-image: url('/static/icons/eye-closed.svg');
+}
+
+.toggle-eye.eye-open {
+    background-image: url('/static/icons/eye-open.svg');
+}

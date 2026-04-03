@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, flash, get_flashed_messages
+from flask import Flask, render_template, request, redirect, session, flash
 from functools import wraps
 from config import Config
 from models import db
@@ -27,24 +27,36 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if "user_id" not in session:
-            flash("Please log in to access this page.", "error")
+            flash("Please log in.", "error")
             return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
 
 def get_current_user():
     user_id = session.get("user_id")
+
     if not user_id:
         return None
-    return User.query.get(user_id)
+
+    user = User.query.get(user_id)
+
+    if not user:
+        session.clear()
+        return None
+
+    return user
 
 # --------------
 # Register Route
 # --------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if "user_id" in session:
+        return redirect("/dashboard")
+
     if request.method == "POST":
         hashed_password = generate_password_hash(request.form["password"])
+
         user = User(
             username=request.form["username"],
             first_name=request.form["first_name"],
@@ -54,10 +66,12 @@ def register():
             phone=request.form["phone"],
             password=hashed_password
         )
+
         db.session.add(user)
         db.session.commit()
-        flash("Account created. Waiting for admin approval.", "info")
-        return redirect("/login")
+
+        return "Account created. Waiting for admin approval."
+
     return render_template("register.html")
 
 # -----------
@@ -67,18 +81,24 @@ def register():
 def login():
     if "user_id" in session:
         return redirect("/dashboard")
+
     if request.method == "POST":
         user = User.query.filter_by(username=request.form["username"]).first()
+
         if not user or not check_password_hash(user.password, request.form["password"]):
             flash("Invalid credentials", "error")
             return redirect("/login")
+
         if not user.approved and not user.is_admin:
             flash("Waiting for admin approval", "info")
             return redirect("/login")
+
         session["user_id"] = user.id
         session["is_admin"] = user.is_admin
+
         flash(f"Welcome, {user.first_name}!", "success")
         return redirect("/dashboard")
+
     return render_template("login.html")
 
 # ------------
@@ -98,8 +118,10 @@ def logout():
 def admin_page():
     if not session.get("is_admin"):
         return "Unauthorized"
+
     pending_users = User.query.filter_by(approved=False).all()
     all_users = User.query.all()
+
     return render_template("admin.html", pending_users=pending_users, all_users=all_users)
 
 # ------------------
@@ -109,16 +131,18 @@ def admin_page():
 @login_required
 def approve(user_id):
     if not session.get("is_admin"):
-        flash("Unauthorized access", "error")
         return redirect("/login")
+
     user = User.query.get(user_id)
     if not user:
         flash("User not found", "error")
         return redirect("/admin")
+
     user.approved = True
     user.account_number = generate_account_number()
+
     db.session.commit()
-    flash(f"User {user.username} approved successfully!", "success")
+    flash(f"{user.username} approved!", "success")
     return redirect("/admin")
 
 # -----------------
@@ -129,40 +153,38 @@ def approve(user_id):
 def delete_user(user_id):
     if not session.get("is_admin"):
         return "Unauthorized"
+
     user = User.query.get(user_id)
+
     if user and not user.is_admin:
         db.session.delete(user)
         db.session.commit()
         flash("User deleted", "success")
     else:
         flash("Cannot delete admin", "error")
+
     return redirect("/admin")
 
 # -----------------------
-# View User Details Route
-# -----------------------
-@app.route("/user/<int:user_id>")
-@login_required
-def view_user(user_id):
-    if not session.get("is_admin"):
-        return "Unauthorized"
-    user = User.query.get(user_id)
-    return render_template("user_detail.html", user=user)
-
-# ---------------
 # Statement Route
-# ---------------
+# -----------------------
 @app.route("/statement")
 @login_required
 def statement():
-    user = get_current_user()
     if session.get("is_admin"):
-        flash("Admins cannot view statements", "error")
         return redirect("/admin")
+
+    user = get_current_user()
+
+    if not user:
+        flash("Session expired. Please log in again.", "error")
+        return redirect("/logout")
+
     transactions = Transaction.query.filter(
         (Transaction.sender_id == user.id) |
         (Transaction.recipient_id == user.id)
-    ).all()
+    ).order_by(Transaction.timestamp.desc()).all()
+
     return render_template("statement.html", transactions=transactions, user=user)
 
 # -------------
@@ -171,34 +193,45 @@ def statement():
 @app.route("/deposit", methods=["GET", "POST"])
 @login_required
 def deposit():
-    user = get_current_user()
-    if user.is_admin:
-        flash("Admins cannot deposit", "error")
+    if session.get("is_admin"):
         return redirect("/admin")
+
+    user = get_current_user()
+
+    if not user:
+        flash("Session expired. Please log in again.", "error")
+        return redirect("/logout")
+
     if request.method == "POST":
         card_number = request.form.get("card_number")
-        expiry_date = request.form.get("expiry_date")
-        ccv = request.form.get("ccv")
+
         try:
             amount = float(request.form["amount"])
-        except (ValueError, TypeError):
+        except:
             flash("Invalid amount", "error")
             return redirect("/deposit")
+
         if amount <= 0:
             flash("Amount must be positive", "error")
             return redirect("/deposit")
+
         user.balance += amount
+
         txn = Transaction(
             sender_id=user.id,
             recipient_id=user.id,
             amount=amount,
             type="deposit",
+            direction="credit",
             description=f"Deposit via card ending {card_number[-4:]}"
         )
+
         db.session.add(txn)
         db.session.commit()
-        flash(f"${amount:.2f} deposited successfully!", "success")
+
+        flash(f"${amount:.2f} deposited!", "success")
         return redirect("/dashboard")
+
     return render_template("deposit.html")
 
 # --------------
@@ -207,37 +240,70 @@ def deposit():
 @app.route("/transfer", methods=["GET", "POST"])
 @login_required
 def transfer():
-    sender = get_current_user()
-    if sender.is_admin:
-        flash("Admins cannot transfer money", "error")
+    if session.get("is_admin"):
         return redirect("/admin")
+
+    sender = get_current_user()
+
+    if not sender:
+        flash("Session expired. Please log in again.", "error")
+        return redirect("/logout")
+
     if request.method == "POST":
-        recipient_account = request.form.get("account_number")
+        account_number = request.form.get("account_number")
+
         try:
-            amount = float(request.form.get("amount", 0))
-        except (ValueError, TypeError):
+            amount = float(request.form.get("amount"))
+        except:
             flash("Invalid amount", "error")
             return redirect("/transfer")
-        recipient = User.query.filter_by(account_number=recipient_account).first()
-        if not recipient or recipient.id == sender.id:
-            flash("Invalid recipient", "error")
+
+        if amount <= 0:
+            flash("Amount must be positive", "error")
             return redirect("/transfer")
+
+        recipient = User.query.filter_by(account_number=account_number).first()
+
+        if not recipient:
+            flash("Recipient not found", "error")
+            return redirect("/transfer")
+
+        if recipient.id == sender.id:
+            flash("Cannot send to yourself", "error")
+            return redirect("/transfer")
+
         if sender.balance < amount:
             flash("Insufficient funds", "error")
             return redirect("/transfer")
+
         sender.balance -= amount
         recipient.balance += amount
-        txn = Transaction(
+
+        txn_out = Transaction(
             sender_id=sender.id,
             recipient_id=recipient.id,
             amount=amount,
             type="transfer",
-            description=f"Transferred ${amount:.2f} to {recipient.username}"
+            direction="debit",
+            description=f"Sent to {recipient.username}"
         )
-        db.session.add(txn)
+
+        txn_in = Transaction(
+            sender_id=sender.id,
+            recipient_id=recipient.id,
+            amount=amount,
+            type="transfer",
+            direction="credit",
+            description=f"Received from {sender.username}"
+        )
+
+        db.session.add(txn_out)
+        db.session.add(txn_in)
         db.session.commit()
-        flash(f"Transferred ${amount:.2f} to {recipient.username} successfully!", "success")
+
+        flash(f"Transferred ${amount:.2f} to {recipient.username}", "success")
         return redirect("/dashboard")
+
     return render_template("transfer.html")
 
 # ---------------------------
@@ -246,10 +312,40 @@ def transfer():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    user = get_current_user()
-    if user.is_admin:
+    if session.get("is_admin"):
         return redirect("/admin")
+
+    user = get_current_user()
+
+    if not user:
+        flash("Session expired. Please log in again.", "error")
+        return redirect("/logout")
+
     return render_template("dashboard.html", user=user)
+
+# ---------------------
+# Change password route
+# ---------------------
+@app.route("/change-password", methods=["POST"])
+@login_required
+def change_password():
+    user = get_current_user()
+
+    if not user:
+        return redirect("/logout")
+
+    current = request.form.get("current_password")
+    new = request.form.get("new_password")
+
+    if not check_password_hash(user.password, current):
+        flash("Current password is incorrect", "error")
+        return redirect("/dashboard")
+
+    user.password = generate_password_hash(new)
+    db.session.commit()
+
+    flash("Password updated successfully", "success")
+    return redirect("/dashboard")
 
 # -------------------------
 # Run the app / Admin Setup
@@ -257,7 +353,10 @@ def dashboard():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
+
+        # Check if admin exists
         admin_user = User.query.filter_by(username="admin").first()
+
         if not admin_user:
             admin_user = User(
                 username="admin",
@@ -268,20 +367,14 @@ if __name__ == "__main__":
                 phone="1234567890",
                 password=generate_password_hash("admin123"),
                 approved=True,
-                is_admin=True
+                is_admin=True,
+                balance=0,
+                account_number=None
             )
+
             db.session.add(admin_user)
             db.session.commit()
-            admin_user.account_number = None
-            admin_user.balance = 0
-            db.session.commit()
-            print("Default admin created")
-        else:
-            admin_user.password = generate_password_hash("admin123")
-            admin_user.approved = True
-            admin_user.is_admin = True
-            admin_user.account_number = None
-            admin_user.balance = 0
-            db.session.commit()
-            print("Admin exists, reset password")
+
+            print("Admin created: username=admin, password=admin123")
+
     app.run(debug=True)

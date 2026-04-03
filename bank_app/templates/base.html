@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Bank App</title>
-    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-papP6B0vQWyUMbOXfkp8f5+P6JbRjvI+2CzT8Wv5X2htVxRkR0kOGkD56M3/0gO5wTzTjv8j2oN87iyj1p2d2Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     <header>
@@ -52,5 +53,8 @@
         <hr>
         <p>© 2026 Banking App</p>
     </footer>
+
+    <!-- Central JS file -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

@@ -14,27 +14,45 @@
     {% endif %}
 {% endwith %}
 
+<button class="toggle-sensitive-btn">Toggle Sensitive Info</button>
+
 <!-- User Info -->
 <fieldset class="account-info">
     <legend>Account Info</legend>
     <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
     <p><strong>Username:</strong> {{ user.username }}</p>
-    <p><strong>Account Number:</strong> {{ user.account_number }}</p>
-    <p><strong>Balance:</strong> ${{ "%.2f"|format(user.balance) }}</p>
+    <p><strong>Account Number:</strong> <span class="sensitive">{{ user.account_number }}</span></p>
+    <p><strong>Balance:</strong> $<span class="sensitive">{{ "%.2f"|format(user.balance) }}</span></p>
 </fieldset>
 
 <!-- Contact Info -->
 <fieldset class="contact-info">
     <legend>Contact Info</legend>
-    <p><strong>Address:</strong> {{ user.address }}</p>
-    <p><strong>Phone:</strong> {{ user.phone }}</p>
+    <p><strong>Address:</strong> <span class="sensitive">{{ user.address }}</span></p>
+    <p><strong>Phone:</strong> <span class="sensitive">{{ user.phone }}</span></p>
 </fieldset>
 
+<!-- Change Password -->
+<fieldset>
+    <legend>Change Password</legend>
+    <form method="POST" action="/change-password">
+        <div class="password-wrapper">
+            <input id="current_password" type="password" name="current_password" placeholder="Current Password" required>
+            <i class="fa-solid fa-eye toggle-eye" data-target="current_password"></i>
+        </div>
+        <div class="password-wrapper">
+            <input id="new_password" type="password" name="new_password" placeholder="New Password" required>
+            <i class="fa-solid fa-eye toggle-eye" data-target="new_password"></i>
+        </div>
+        <button type="submit">Update Password</button>
+    </form>
+</fieldset>
+
+<!-- Actions -->
 <fieldset class="actions">
     <legend>Actions</legend>
     <a href="/deposit">Deposit Money</a><br>
     <a href="/statement">View Statement</a><br>
     <a href="/transfer">Transfer Money</a>
 </fieldset>
-
 {% endblock %}
