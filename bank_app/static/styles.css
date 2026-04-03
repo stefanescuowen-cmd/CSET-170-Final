@@ -231,43 +231,21 @@ a:hover {
     color: var(--accent-glow);
 }
 /* -------------------------
-   Sensitive info & password toggle
--------------------------- */
-
-/* Blur effect for any sensitive info */
-.sensitive {
-    filter: blur(6px);
-    user-select: none;
-    transition: filter 0.3s;
-}
-
-/* Toggle button for blur (e.g., dashboard sensitive info) */
-#toggle-sensitive {
-    margin-bottom: 15px;
-    padding: 8px 15px;
-    background: #444;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-#toggle-sensitive:hover {
-    background: #666;
-}
-
-/* Wrapper for password inputs */
+   Password wrapper and input spacing
+------------------------- */
 .password-wrapper, .password-field {
     position: relative;
     margin-bottom: 10px;
 }
 
-/* Add spacing to password input so the eye icon fits */
 .password-wrapper input, .password-field input {
     width: 100%;
     padding-right: 40px;
 }
 
-/* Font Awesome eye icon */
+/* -------------------------
+   Eye icon for password toggle
+------------------------- */
 .toggle-eye, .eye-icon {
     position: absolute;
     right: 10px;
@@ -275,42 +253,37 @@ a:hover {
     transform: translateY(-50%);
     cursor: pointer;
     font-size: 1.1em;
-    color: #ccc; /* slightly lighter for visibility on dark background */
-}
-
-/* hover effect on eye icon */
-.toggle-eye:hover, .eye-icon:hover {
     color: #fff;
 }
+.toggle-eye:hover, .eye-icon:hover {
+    color: #0f0;
+}
 
-/* reusable blur toggle class for dashboard/statement/etc */
-.blurred {
+/* -------------------------
+   Sensitive info blur
+------------------------- */
+/* Start blurred by default */
+.sensitive {
     filter: blur(6px);
     user-select: none;
+    transition: filter 0.3s;
+}
+
+/* When toggled, remove blur */
+.sensitive.unblurred {
+    filter: none;
 }
 
 /* -------------------------
-   Bank Statement Amount Colors
--------------------------- */
-td.amount-credit {
-    color: var(--success); /* green for credit */
-    font-weight: bold;
-}
-
-td.amount-debit {
-    color: var(--danger); /* red for debit */
-    font-weight: bold;
+   Toggle button z-index
+------------------------- */
+#toggle-sensitive, .clickable-btn { 
+    position: relative; 
+    z-index: 10; 
 }
 
 /* -------------------------
-   Bank Statement Amount Colors
--------------------------- */
-td.amount-credit {
-    color: var(--success); /* green for credit */
-    font-weight: bold;
-}
-
-td.amount-debit {
-    color: var(--danger); /* red for debit */
-    font-weight: bold;
-}
+   Statement amount colors
+------------------------- */
+td.amount-credit { color: var(--success); font-weight: bold; }
+td.amount-debit  { color: var(--danger); font-weight: bold; }

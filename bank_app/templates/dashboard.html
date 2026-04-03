@@ -14,7 +14,10 @@
     {% endif %}
 {% endwith %}
 
-<button id="toggle-sensitive">Toggle Sensitive Info</button>
+<!-- Toggle Sensitive Info Button -->
+<div class="toggle-container">
+    <button class="toggle-sensitive clickable-btn">Toggle Sensitive Info</button>
+</div>
 
 <!-- User Info -->
 <fieldset class="account-info">
@@ -33,7 +36,7 @@
 </fieldset>
 
 <!-- Change Password -->
-<fieldset>
+<fieldset class="change-password">
     <legend>Change Password</legend>
     <form method="POST" action="/change-password">
         <div class="password-wrapper">

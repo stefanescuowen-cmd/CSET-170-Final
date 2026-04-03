@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request, redirect, session, flash
 from functools import wraps
-from config import Config
+from werkzeug.security import generate_password_hash, check_password_hash
+import random
+
 from models import db
 from models.user import User
 from models.transaction import Transaction
-from werkzeug.security import generate_password_hash, check_password_hash
-import random
+from config import Config
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -34,21 +35,18 @@ def login_required(f):
 
 def get_current_user():
     user_id = session.get("user_id")
-
     if not user_id:
         return None
 
     user = User.query.get(user_id)
-
     if not user:
         session.clear()
         return None
-
     return user
 
-# --------------
-# Register Route
-# --------------
+# -----------------
+# Routes
+# -----------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if "user_id" in session:
@@ -56,7 +54,6 @@ def register():
 
     if request.method == "POST":
         hashed_password = generate_password_hash(request.form["password"])
-
         user = User(
             username=request.form["username"],
             first_name=request.form["first_name"],
@@ -66,17 +63,13 @@ def register():
             phone=request.form["phone"],
             password=hashed_password
         )
-
         db.session.add(user)
         db.session.commit()
-
-        return "Account created. Waiting for admin approval."
+        flash("Account created. Waiting for admin approval.", "success")
+        return redirect("/login")
 
     return render_template("register.html")
 
-# -----------
-# Login Route
-# -----------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if "user_id" in session:
@@ -84,7 +77,6 @@ def login():
 
     if request.method == "POST":
         user = User.query.filter_by(username=request.form["username"]).first()
-
         if not user or not check_password_hash(user.password, request.form["password"]):
             flash("Invalid credentials", "error")
             return redirect("/login")
@@ -95,24 +87,17 @@ def login():
 
         session["user_id"] = user.id
         session["is_admin"] = user.is_admin
-
         flash(f"Welcome, {user.first_name}!", "success")
         return redirect("/dashboard")
 
     return render_template("login.html")
 
-# ------------
-# Logout Route
-# ------------
 @app.route("/logout")
 def logout():
     session.clear()
     flash("Logged out successfully.", "success")
     return redirect("/login")
 
-# ----------------
-# Admin Page Route
-# ----------------
 @app.route("/admin")
 @login_required
 def admin_page():
@@ -121,12 +106,8 @@ def admin_page():
 
     pending_users = User.query.filter_by(approved=False).all()
     all_users = User.query.all()
-
     return render_template("admin.html", pending_users=pending_users, all_users=all_users)
 
-# ------------------
-# Approve User Route
-# ------------------
 @app.route("/approve/<int:user_id>")
 @login_required
 def approve(user_id):
@@ -140,14 +121,10 @@ def approve(user_id):
 
     user.approved = True
     user.account_number = generate_account_number()
-
     db.session.commit()
     flash(f"{user.username} approved!", "success")
     return redirect("/admin")
 
-# -----------------
-# Delete User Route
-# -----------------
 @app.route("/delete/<int:user_id>")
 @login_required
 def delete_user(user_id):
@@ -155,19 +132,14 @@ def delete_user(user_id):
         return "Unauthorized"
 
     user = User.query.get(user_id)
-
     if user and not user.is_admin:
         db.session.delete(user)
         db.session.commit()
         flash("User deleted", "success")
     else:
         flash("Cannot delete admin", "error")
-
     return redirect("/admin")
 
-# -----------------------
-# Statement Route
-# -----------------------
 @app.route("/statement")
 @login_required
 def statement():
@@ -175,7 +147,6 @@ def statement():
         return redirect("/admin")
 
     user = get_current_user()
-
     if not user:
         flash("Session expired. Please log in again.", "error")
         return redirect("/logout")
@@ -187,9 +158,6 @@ def statement():
 
     return render_template("statement.html", transactions=transactions, user=user)
 
-# -------------
-# Deposit Route
-# -------------
 @app.route("/deposit", methods=["GET", "POST"])
 @login_required
 def deposit():
@@ -197,14 +165,12 @@ def deposit():
         return redirect("/admin")
 
     user = get_current_user()
-
     if not user:
         flash("Session expired. Please log in again.", "error")
         return redirect("/logout")
 
     if request.method == "POST":
         card_number = request.form.get("card_number")
-
         try:
             amount = float(request.form["amount"])
         except:
@@ -228,15 +194,11 @@ def deposit():
 
         db.session.add(txn)
         db.session.commit()
-
         flash(f"${amount:.2f} deposited!", "success")
         return redirect("/dashboard")
 
     return render_template("deposit.html")
 
-# --------------
-# Transfer Route
-# --------------
 @app.route("/transfer", methods=["GET", "POST"])
 @login_required
 def transfer():
@@ -244,14 +206,12 @@ def transfer():
         return redirect("/admin")
 
     sender = get_current_user()
-
     if not sender:
         flash("Session expired. Please log in again.", "error")
         return redirect("/logout")
 
     if request.method == "POST":
         account_number = request.form.get("account_number")
-
         try:
             amount = float(request.form.get("amount"))
         except:
@@ -263,7 +223,6 @@ def transfer():
             return redirect("/transfer")
 
         recipient = User.query.filter_by(account_number=account_number).first()
-
         if not recipient:
             flash("Recipient not found", "error")
             return redirect("/transfer")
@@ -287,7 +246,6 @@ def transfer():
             direction="debit",
             description=f"Sent to {recipient.username}"
         )
-
         txn_in = Transaction(
             sender_id=sender.id,
             recipient_id=recipient.id,
@@ -300,15 +258,11 @@ def transfer():
         db.session.add(txn_out)
         db.session.add(txn_in)
         db.session.commit()
-
         flash(f"Transferred ${amount:.2f} to {recipient.username}", "success")
         return redirect("/dashboard")
 
     return render_template("transfer.html")
 
-# ---------------------------
-# Dashboard Route
-# ---------------------------
 @app.route("/dashboard")
 @login_required
 def dashboard():
@@ -316,21 +270,16 @@ def dashboard():
         return redirect("/admin")
 
     user = get_current_user()
-
     if not user:
         flash("Session expired. Please log in again.", "error")
         return redirect("/logout")
 
     return render_template("dashboard.html", user=user)
 
-# ---------------------
-# Change password route
-# ---------------------
 @app.route("/change-password", methods=["POST"])
 @login_required
 def change_password():
     user = get_current_user()
-
     if not user:
         return redirect("/logout")
 
@@ -343,7 +292,6 @@ def change_password():
 
     user.password = generate_password_hash(new)
     db.session.commit()
-
     flash("Password updated successfully", "success")
     return redirect("/dashboard")
 
@@ -352,12 +300,11 @@ def change_password():
 # -------------------------
 if __name__ == "__main__":
     with app.app_context():
+        # Persistent DB file (must be set in Config)
         db.create_all()
 
-        # Check if admin exists
-        admin_user = User.query.filter_by(username="admin").first()
-
-        if not admin_user:
+        # Admin check
+        if not User.query.filter_by(username="admin").first():
             admin_user = User(
                 username="admin",
                 first_name="Admin",
@@ -371,10 +318,8 @@ if __name__ == "__main__":
                 balance=0,
                 account_number=None
             )
-
             db.session.add(admin_user)
             db.session.commit()
-
             print("Admin created: username=admin, password=admin123")
 
     app.run(debug=True)

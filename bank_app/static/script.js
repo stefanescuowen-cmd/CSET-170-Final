@@ -1,20 +1,16 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // Login password toggle
-    const togglePassword = document.getElementById("toggle-password");
-    if (togglePassword) {
-        const passwordInput = document.getElementById("password");
-        togglePassword.addEventListener("click", function() {
-            if (passwordInput.type === "password") {
-                passwordInput.type = "text";
-                togglePassword.classList.replace("fa-eye", "fa-eye-slash");
-            } else {
-                passwordInput.type = "password";
-                togglePassword.classList.replace("fa-eye-slash", "fa-eye");
-            }
+    // Sensitive info toggle for all pages
+    document.querySelectorAll(".toggle-sensitive").forEach(button => {
+        button.addEventListener("click", function() {
+            console.log("Toggle button clicked!");  // debug
+            document.querySelectorAll(".sensitive").forEach(el => {
+                // Toggle 'unblurred' class instead of 'blurred'
+                el.classList.toggle("unblurred");
+            });
         });
-    }
+    });
 
-    // Dashboard / change password toggle (works also for register)
+    // Password toggle logic
     document.querySelectorAll(".toggle-eye").forEach(icon => {
         icon.addEventListener("click", function() {
             const targetId = icon.getAttribute("data-target");
@@ -28,14 +24,4 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     });
-
-    // Dashboard blur toggle for sensitive data
-    const toggleSensitiveBtn = document.getElementById("toggle-sensitive");
-    if (toggleSensitiveBtn) {
-        toggleSensitiveBtn.addEventListener("click", function() {
-            document.querySelectorAll(".sensitive").forEach(el => {
-                el.classList.toggle("blurred");
-            });
-        });
-    }
 });

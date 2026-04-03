@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <title>Bank App</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-papP6B0vQWyUMbOXfkp8f5+P6JbRjvI+2CzT8Wv5X2htVxRkR0kOGkD56M3/0gO5wTzTjv8j2oN87iyj1p2d2Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header>
         <h1>Banking System</h1>
-
         <nav>
             {% if session.get('user_id') %}
-
                 {% if session.get('is_admin') %}
                 <a href="/admin">Admin Dashboard</a>
                 {% else %}
@@ -21,17 +19,13 @@
                 <a href="/transfer">Transfer</a>
                 <a href="/statement">Statement</a>
                 {% endif %}
-
                 | <a href="/logout">Logout</a>
-
             {% else %}
                 <a href="/register">Register</a> |
                 <a href="/login">Login</a>
             {% endif %}
         </nav>
-
         <hr>
-
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -42,7 +36,6 @@
             </ul>
           {% endif %}
         {% endwith %}
-
     </header>
 
     <main>
