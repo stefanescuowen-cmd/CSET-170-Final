@@ -10,7 +10,13 @@
     <input name="ssn" placeholder="SSN"><br>
     <input name="address" placeholder="Address"><br>
     <input name="phone" placeholder="Phone"><br>
-    <input name="password" type="password" placeholder="Password"><br>
+
+    <!-- Password field with eye toggle -->
+    <div class="password-wrapper">
+        <input id="register_password" name="password" type="password" placeholder="Password" required>
+        <i class="fa-solid fa-eye toggle-eye" data-target="register_password"></i>
+    </div>
+
     <button type="submit">Register</button>
 </form>
 {% endblock %}

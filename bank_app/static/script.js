@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Dashboard / change password toggle
+    // Dashboard / change password toggle (works also for register)
     document.querySelectorAll(".toggle-eye").forEach(icon => {
         icon.addEventListener("click", function() {
             const targetId = icon.getAttribute("data-target");
