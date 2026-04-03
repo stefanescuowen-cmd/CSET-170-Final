@@ -34,7 +34,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center; /* Center horizontally */
-    justify-content: center; /* Center vertically if enough space */
+    justify-content: flex-start; /* Top-align vertically */
     min-height: 100vh;
     padding: 20px;
 }
@@ -46,11 +46,12 @@ header, footer {
     background-color: #222;
     color: #fff;
     padding: 10px 20px;
+    text-align: center;
 }
 
 header nav a {
     color: #fff;
-    margin-right: 10px;
+    margin: 0 10px;
     text-decoration: none;
 }
 
@@ -68,7 +69,6 @@ h2, h3 {
 }
 
 h3 {
-    text-align: left;
     max-width: 1000px;
     margin: 20px auto 10px auto;
 }
@@ -97,7 +97,10 @@ form {
     width: 100%;
     max-width: 400px;
     border: 1px solid rgba(139, 92, 246, 0.2);
-    margin: 20px 0;
+    margin: 30px auto; /* Center forms horizontally */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* -------------------------
@@ -144,23 +147,15 @@ button:hover {
 /* -------------------------
    Flash Messages
 -------------------------- */
-.flash-success {
-    color: var(--success);
+.flash-success, .flash-error, .flash-info {
     font-weight: bold;
     margin-bottom: 10px;
+    text-align: center;
 }
 
-.flash-error {
-    color: var(--danger);
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.flash-info {
-    color: var(--accent-glow);
-    font-weight: bold;
-    margin-bottom: 10px;
-}
+.flash-success { color: var(--success); }
+.flash-error { color: var(--danger); }
+.flash-info  { color: var(--accent-glow); }
 
 /* -------------------------
    Tables
@@ -172,7 +167,7 @@ table {
     background: var(--card-bg);
     border-radius: 12px;
     overflow: hidden;
-    margin: 20px auto;
+    margin: 20px auto; /* Center tables horizontally */
 }
 
 th, td {
@@ -230,12 +225,14 @@ a {
 a:hover {
     color: var(--accent-glow);
 }
+
 /* -------------------------
    Password wrapper and input spacing
-------------------------- */
+-------------------------- */
 .password-wrapper, .password-field {
     position: relative;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    width: 100%;
 }
 
 .password-wrapper input, .password-field input {
@@ -245,7 +242,7 @@ a:hover {
 
 /* -------------------------
    Eye icon for password toggle
-------------------------- */
+-------------------------- */
 .toggle-eye, .eye-icon {
     position: absolute;
     right: 10px;
@@ -261,22 +258,20 @@ a:hover {
 
 /* -------------------------
    Sensitive info blur
-------------------------- */
-/* Start blurred by default */
+-------------------------- */
 .sensitive {
     filter: blur(6px);
     user-select: none;
     transition: filter 0.3s;
 }
 
-/* When toggled, remove blur */
 .sensitive.unblurred {
     filter: none;
 }
 
 /* -------------------------
    Toggle button z-index
-------------------------- */
+-------------------------- */
 #toggle-sensitive, .clickable-btn { 
     position: relative; 
     z-index: 10; 
@@ -284,6 +279,6 @@ a:hover {
 
 /* -------------------------
    Statement amount colors
-------------------------- */
+-------------------------- */
 td.amount-credit { color: var(--success); font-weight: bold; }
 td.amount-debit  { color: var(--danger); font-weight: bold; }
