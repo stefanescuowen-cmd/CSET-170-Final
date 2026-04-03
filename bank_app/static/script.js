@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Dashboard password/sensitive info toggle
+    // Dashboard / change password toggle
     document.querySelectorAll(".toggle-eye").forEach(icon => {
         icon.addEventListener("click", function() {
             const targetId = icon.getAttribute("data-target");
@@ -30,11 +30,11 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // Dashboard blur toggle for sensitive data
-    const toggleSensitiveBtn = document.querySelector(".toggle-sensitive-btn");
+    const toggleSensitiveBtn = document.getElementById("toggle-sensitive");
     if (toggleSensitiveBtn) {
         toggleSensitiveBtn.addEventListener("click", function() {
             document.querySelectorAll(".sensitive").forEach(el => {
-                el.classList.toggle("blur");
+                el.classList.toggle("blurred");
             });
         });
     }

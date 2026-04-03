@@ -14,22 +14,22 @@
     {% endif %}
 {% endwith %}
 
-<button class="toggle-sensitive-btn">Toggle Sensitive Info</button>
+<button id="toggle-sensitive">Toggle Sensitive Info</button>
 
 <!-- User Info -->
 <fieldset class="account-info">
     <legend>Account Info</legend>
     <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
     <p><strong>Username:</strong> {{ user.username }}</p>
-    <p><strong>Account Number:</strong> <span class="sensitive">{{ user.account_number }}</span></p>
-    <p><strong>Balance:</strong> $<span class="sensitive">{{ "%.2f"|format(user.balance) }}</span></p>
+    <p><strong>Account Number:</strong> <span class="sensitive blurred">{{ user.account_number }}</span></p>
+    <p><strong>Balance:</strong> $<span class="sensitive blurred">{{ "%.2f"|format(user.balance) }}</span></p>
 </fieldset>
 
 <!-- Contact Info -->
 <fieldset class="contact-info">
     <legend>Contact Info</legend>
-    <p><strong>Address:</strong> <span class="sensitive">{{ user.address }}</span></p>
-    <p><strong>Phone:</strong> <span class="sensitive">{{ user.phone }}</span></p>
+    <p><strong>Address:</strong> <span class="sensitive blurred">{{ user.address }}</span></p>
+    <p><strong>Phone:</strong> <span class="sensitive blurred">{{ user.phone }}</span></p>
 </fieldset>
 
 <!-- Change Password -->

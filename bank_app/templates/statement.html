@@ -14,6 +14,9 @@
     {% endif %}
 {% endwith %}
 
+<!-- Toggle button for sensitive info -->
+<button id="toggle-sensitive">Toggle Sensitive Info</button>
+
 {% if transactions %}
 <table>
     <thead>
@@ -31,10 +34,10 @@
         <tr>
             <td>{{ txn.timestamp.strftime("%Y-%m-%d %H:%M") if txn.timestamp else "N/A" }}</td>
             <td>{{ txn.type|capitalize }}</td>
-            <td>{{ txn.sender.username if txn.sender else "N/A" }}</td>
-            <td>{{ txn.recipient.username if txn.recipient else "N/A" }}</td>
+            <td><span class="sensitive">{{ txn.sender.username if txn.sender else "N/A" }}</span></td>
+            <td><span class="sensitive">{{ txn.recipient.username if txn.recipient else "N/A" }}</span></td>
             <td>{{ txn.description or "-" }}</td>
-            <td>${{ "%.2f"|format(txn.amount) }}</td>
+            <td>$<span class="sensitive">{{ "%.2f"|format(txn.amount) }}</span></td>
         </tr>
     {% endfor %}
     </tbody>
