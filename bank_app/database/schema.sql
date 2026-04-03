@@ -1,4 +1,7 @@
-CREATE TABLE users (
+-- -------------------------
+-- Users Table
+-- -------------------------
+CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     first_name TEXT NOT NULL,
@@ -7,13 +10,33 @@ CREATE TABLE users (
     address TEXT NOT NULL,
     phone TEXT NOT NULL,
     password TEXT NOT NULL,
-
     approved BOOLEAN DEFAULT 0,
     is_admin BOOLEAN DEFAULT 0,
-
     account_number TEXT UNIQUE,
     balance REAL DEFAULT 0.0
 );
 
+-- Create admin user
 INSERT INTO users (username, first_name, last_name, ssn, address, phone, password, approved, is_admin)
 VALUES ('admin', 'Admin', 'User', '000-00-0000', 'Bank HQ', '1234567890', '<hashed_password>', 1, 1);
+
+
+-- -------------------------
+-- Transactions Table
+-- -------------------------
+CREATE TABLE IF NOT EXISTS transactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    
+    sender_id INTEGER,
+    recipient_id INTEGER,
+    
+    amount REAL NOT NULL,
+    type TEXT NOT NULL,        -- "deposit" or "transfer"
+    direction TEXT NOT NULL,   -- "credit" or "debit"
+    description TEXT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
+    -- Foreign key constraints
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE SET NULL
+);
